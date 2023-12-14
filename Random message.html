@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bible Verse Pop Up</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-image: url("paw2.png");
+            background-position: center;
+            margin: 0;
+        }
+
+        .popup {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            background-color: rgba(255, 255, 255, 0.7); /* 70% opacity */
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            visibility: hidden;
+            opacity: 0;
+            transition: visibility 0s, opacity 0.5s linear;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .popup:before {
+            content: "";
+            display: block;
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            margin-left: -20px;
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-bottom: 20px solid rgba(255, 255, 255, 0.7); /* 70% opacity */
+        }
+
+        .popup:after {
+            content: "";
+            display: block;
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            margin-left: -10px;
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 10px solid #f5f5f5;
+        }
+
+        .popup.visible {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .popup p {
+            font-size: 24px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="popup" id="popup">
+        <p></p>
+    </div>
+    <script>
+        var messages = [
+            // Matthew
+            "Matthew 11:28 - 'Come to me, all you who are weary and burdened,and I will give you rest.'", 
+            "Matthew 17:20 - 'He replied, 'Because you have so little faith. Truly I tell you, if you have faith as small as a mustard seed, you can say to this mountain, 'Move from here to there,' and it will move. Nothing will be impossible for you.''", 
+            "Matthew 6:33 - 'But seek first his kingdom and his righteousness, and all these things will be given to you as well.'",
+            "Matthew 28:20 - 'And surely I am with you always, to the very end of the age.'", "Matthew 19:26 - 'Jesus looked at them and said, 'With man, this is impossible, but with God, all things are possible.''", "Matthew 7:7-8 - 'Ask and it will be given to you; seek and you will find; knock and the door will be opened to you. For everyone who asks receives; the one who seeks finds; and to the one who knocks, the door will be opened.'", 
+            "Matthew 24:35 - 'Heaven and earth will pass away, but my words will never pass away.'", 
+            "Matthew 16:24 - 'Then Jesus said to his disciples, 'Whoever wants to be my disciple must deny themselves and take up their cross and follow me.''", 
+            "Matthew 5:16 - 'In the same way, let your light shine before others, that they may see your good deeds and glorify your Father in heaven.'", 
+            "Matthew 19:26 - 'Jesus looked at them and said, 'With man this is impossible, but with God all things are possible.''", 
+            "Matthew 10:39 - 'Whoever finds their life will lose it, and whoever loses their life for my sake will find it.'",
+
+            // Mark 
+            "Mark 9:23 - 'If you can'?' said Jesus. 'Everything is possible for one who believes.'",
+            "Mark 10:27 - 'Jesus looked at them and said, 'With man this is impossible, but not with God; all things are possible with God.''",
+            "Mark 16:15 - 'He said to them, 'Go into all the world and preach the gospel to all creation.''", 
+            "Mark 8:36 - 'What good is it for someone to gain the whole world, yet forfeit their soul?'", 
+            "Mark 12:31 - 'The second is this: 'Love your neighbor as yourself.' There is no commandment greater than these.''", 
+            "Mark 16:20 - 'Then the disciples went out and preached everywhere, and the Lord worked with them and confirmed his word by the signs that accompanied it.'",
+
+            // Luke
+            "Luke 1:37 - 'For no word from God will ever fail.'",
+            "Luke 2:11 - 'Today in the town of David, a Savior has been born to you; he is the Messiah, the Lord.'",
+            "Luke 6:31 - 'Do to others as you would have them do to you.'",
+            "Luke 10:27 - 'He answered, 'Love the Lord your God with all your heart and with all your soul and with all your strength and with all your mind'; and, 'Love your neighbor as yourself.''",
+            "Luke 12:32 - 'Do not be afraid, little flock, for your Father has been pleased to give you the kingdom.'",
+            "Luke 19:10 - 'For the Son of Man came to seek and to save the lost.'",
+            "Luke 11:9 - 'So I say to you: Ask and it will be given to you; seek and you will find; knock and the door will be opened to you.'",
+            "Luke 15:7 - 'I tell you that in the same way, there will be more rejoicing in heaven over one sinner who repents than over ninety-nine righteous persons who do not need to repent.'",
+            "Luke 14:11 - 'For all those who exalt themselves will be humbled, and those who humble themselves will be exalted.'",
+            "Luke 16:10 - 'Whoever can be trusted with very little can also be trusted with much, and whoever is dishonest with very little will also be dishonest with much.'",
+            "Luke 8:15 - 'But the seed on good soil stands for those with a noble and good heart, who hear the word, retain it, and by persevering produce a crop.'",
+            "Luke 18:14 - 'I tell you that this man, rather than the other, went home justified before God. For all those who exalt themselves will be humbled.'",
+            "Luke 24:46-47 - 'He told them, 'This is what is written: The Messiah will suffer and rise from the dead on the third day, and repentance for the forgiveness of sins will be preached in his name to all nations, beginning at Jerusalem.'",
+        
+            // John
+            "John 14:6 - 'Jesus answered, 'I am the way and the truth and the life. No one comes to the Father except through me.''",
+            "John 6:35 - 'Then Jesus declared, 'I am the bread of life. Whoever comes to me will never go hungry, and whoever believes in me will never be thirsty.''",
+            "John 11:25-26 - 'Jesus said to her, 'I am the resurrection and the life. The one who believes in me will live, even though they die; and whoever lives by believing in me will never die. Do you believe this?'",
+            "John 14:27 - 'Peace I leave with you; my peace I give you. I do not give to you as the world gives. Do not let your hearts be troubled and do not be afraid.'",
+            "John 15:5 - 'I am the vine; you are the branches. If you remain in me and I in you, you will bear much fruit; apart from me, you can do nothing.'",
+            "John 16:33 - 'I have told you these things, so that in me you may have peace. In this world, you will have trouble. But take heart! I have overcome the world.'",
+            "John 8:32 - 'Then you will know the truth, and the truth will set you free.'",
+            "John 13:34-35 - 'A new command I give you: Love one another. As I have loved you, so you must love one another. By this, everyone will know that you are my disciples if you love one another.'",
+            "John 10:10 - 'The thief comes only to steal and kill and destroy; I have come that they may have life and have it to the full.'",
+            "John 4:24 - 'God is spirit, and his worshipers must worship in the Spirit and in truth.'",
+            "John 3:16 - 'For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.'",
+            "John 1:12 - 'Yet to all who did receive him, to those who believed in his name, he gave the right to become children of God.'",    
+
+            // Philippians
+            "'Philippians 4:6-7 - 'Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God. And the peace of God, which transcends all understanding, will guard your hearts and your minds in Christ Jesus.'",
+            "'Philippians 4:13 - 'I can do all this through him who gives me strength.'",
+            "'Philippians 4:19 - 'And my God will meet all your needs according to the riches of his glory in Christ Jesus.'",
+
+            // Ephesians
+            "'Ephesians 2:8-9 - 'For it is by grace you have been saved, through faith—and this is not from yourselves, it is the gift of God—not by works, so that no one can boast.'",
+            "'Ephesians 3:20-21 - 'Now to him who is able to do immeasurably more than all we ask or imagine, according to his power that is at work within us, to him be glory in the church and in Christ Jesus throughout all generations, for ever and ever! Amen.'",
+
+            // Thessalonians
+            "'1 Thessalonians 5:16-18 - 'Rejoice always, pray continually, give thanks in all circumstances; for this is God’s will for you in Christ Jesus.'",
+            "'1 Thessalonians 5:23-24 - 'May God himself, the God of peace, sanctify you through and through. May your whole spirit, soul, and body be kept blameless at the coming of our Lord Jesus Christ. The one who calls you is faithful, and he will do it.'",
+
+            // Proverbs
+            "Proverbs 3:5-6 - 'Trust in the LORD with all your heart and lean not on your own understanding; in all your ways submit to him, and he will make your paths straight.'",
+            "Proverbs 16:3 - 'Commit to the LORD whatever you do, and he will establish your plans.'",
+            "Proverbs 19:21 - 'Many are the plans in a person’s heart, but it is the LORD’s purpose that prevails.'",
+            "Proverbs 4:7 - 'The beginning of wisdom is this: Get wisdom. Though it cost all you have, get understanding.'",
+            "Proverbs 16:9 - 'In their hearts humans plan their course, but the LORD establishes their steps.'",
+            "Proverbs 15:29 - 'The LORD is far from the wicked, but he hears the prayer of the righteous.'",
+            "Proverbs 28:9 - 'If anyone turns a deaf ear to my instruction, even their prayers are detestable.'",
+            "Proverbs 15:8 - 'The LORD detests the sacrifice of the wicked, but the prayer of the upright pleases him.'",
+            "Proverbs 3:24 - 'When you lie down, you will not be afraid; when you lie down, your sleep will be sweet.'",
+            "Proverbs 16:7 - 'When the LORD takes pleasure in anyone’s way, he causes their enemies to make peace with them.'",
+            
+            //Isiah
+            "'Isaiah 41:10 - 'So do not fear, for I am with you; do not be dismayed, for I am your God. I will strengthen you and help you; I will uphold you with my righteous right hand.'",
+            "Isaiah 43:7 - 'everyone who is called by my name, whom I created for my glory, whom I formed and made.'",
+            "Isaiah 55:8-9 - 'For my thoughts are not your thoughts, neither are your ways my ways, declares the LORD. For as the heavens are higher than the earth, so are my ways higher than your ways and my thoughts than your thoughts.'",
+            "Isaiah 58:11 - 'And the LORD will guide you continually and satisfy your desire in scorched places and make your bones strong; and you shall be like a watered garden, like a spring of water, whose waters do not fail.'",
+            "Isaiah 26:3 - 'You keep him in perfect peace whose mind is stayed on you because he trusts in you.'",
+            "Isaiah 30:21 - 'And your ears shall hear a word behind you, saying, 'This is the way, walk in it,' when you turn to the right or when you turn to the left.'",
+            "Isaiah 41:13 - 'For I am the LORD your God who takes hold of your right hand and says to you, Do not fear; I will help you.'",
+            "Isaiah 65:24 - 'Before they call I will answer; while they are yet speaking I will hear.'",
+            
+            // Jeremiah
+            "'Jeremiah 29:11 - 'For I know the plans I have for you, declares the LORD, plans for welfare and not for evil, to give you a future and a hope.'",
+            "Jeremiah 17:7-8 - 'Blessed is the man who trusts in the LORD, whose trust is the LORD. He is like a tree planted by water, that sends out its roots by the stream, and does not fear when heat comes, for its leaves remain green, and is not anxious in the year of drought, for it does not cease to bear fruit.'",
+            "Jeremiah 33:3 - 'Call to me and I will answer you, and will tell you great and hidden things that you have not known.'",
+            "Jeremiah 32:27 - 'Behold, I am the LORD, the God of all flesh. Is anything too hard for me?'",
+            "Jeremiah 1:5 - 'Before I formed you in the womb I knew you, and before you were born I consecrated you; I appointed you a prophet to the nations.'",
+            
+            //Romans
+            "Romans 8:28 - 'And we know that in all things God works for the good of those who love him, who have been called according to his purpose.'",
+            "Romans 8:38-39 - 'For I am convinced that neither death nor life, neither angels nor demons, neither the present nor the future, nor any powers, neither height nor depth, nor anything else in all creation, will be able to separate us from the love of God that is in Christ Jesus our Lord.'",
+            "Romans 10:9 - 'If you declare with your mouth, 'Jesus is Lord,' and believe in your heart that God raised him from the dead, you will be saved.'",
+            "Romans 12:2 - 'Do not conform to the pattern of this world, but be transformed by the renewing of your mind. Then you will be able to test and approve what God’s will is—his good, pleasing and perfect will.'",
+            "Romans 15:13 - 'May the God of hope fill you with all joy and peace as you trust in him, so that you may overflow with hope by the power of the Holy Spirit.'",
+            
+            //Hebrews
+            "Hebrews 11:1 - 'Now faith is confidence in what we hope for and assurance about what we do not see.'",
+            "Hebrews 11:6 - 'And without faith, it is impossible to please God, because anyone who comes to him must believe that he exists and that he rewards those who earnestly seek him.'",
+            "Hebrews 12:1-2 - 'Therefore, since we are surrounded by such a great cloud of witnesses, let us throw off everything that hinders and the sin that so easily entangles. And let us run with perseverance the race marked out for us, fixing our eyes on Jesus, the pioneer and perfecter of faith.'",
+            "Hebrews 4:16 - 'Let us then approach God’s throne of grace with confidence, so that we may receive mercy and find grace to help us in our time of need.'",
+            "Hebrews 13:8 - 'Jesus Christ is the same yesterday and today and forever.'",   
+            
+            //James
+            "James 1:5 - 'If any of you lacks wisdom, you should ask God, who gives generously to all without finding fault, and it will be given to you.'",
+            "James 1:22 - 'Do not merely listen to the word, and so deceive yourselves. Do what it says.'",
+            "James 2:17 - 'In the same way, faith by itself, if it is not accompanied by action, is dead.'",
+            "James 2:26 - 'As the body without the spirit is dead, so faith without deeds is dead.'",
+            "James 3:17-18 - 'But the wisdom that comes from heaven is first of all pure; then peace-loving, considerate, submissive, full of mercy and good fruit, impartial and sincere. Peacemakers who sow in peace reap a harvest of righteousness.'",
+            "James 4:7-8 - 'Submit yourselves, then, to God. Resist the devil, and he will flee from you. Come near to God and he will come near to you.'",
+            "James 4:17 - 'If anyone, then, knows the good they ought to do and doesn’t do it, it is sin for them.'",
+            "James 5:16 - 'Therefore confess your sins to each other and pray for each other so that you may be healed. The prayer of a righteous person is powerful and effective.'",
+
+            // 1 Peter
+            "1 Peter 5:7 - 'Cast all your anxiety on him because he cares for you.'",
+            "1 Peter 2:9 - 'But you are a chosen people, a royal priesthood, a holy nation, God’s special possession, that you may declare the praises of him who called you out of darkness into his wonderful light.'",
+            "1 Peter 3:15 - 'But in your hearts revere Christ as Lord. Always be prepared to give an answer to everyone who asks you to give the reason for the hope that you have. But do this with gentleness and respect.'",
+            "1 Peter 4:8 - 'Above all, love each other deeply, because love covers over a multitude of sins.'",
+            "1 Peter 4:10 - 'Each of you should use whatever gift you have received to serve others, as faithful stewards of God’s grace in its various forms.'",
+            "1 Peter 5:8 - 'Be alert and of sober mind. Your enemy the devil prowls around like a roaring lion looking for someone to devour.'",
+            "1 Peter 1:3 - 'Praise be to the God and Father of our Lord Jesus Christ! In his great mercy, he has given us new birth into a living hope through the resurrection of Jesus Christ from the dead.'",
+            "1 Peter 4:19 - 'So then, those who suffer according to God’s will should commit themselves to their faithful Creator and continue to do good.'",
+        
+            "Psalms 28:7 - 'The LORD is my strength and my shield; my heart trusts in him, and he helps me. My heart leaps for joy, and with my song, I praise him.'",
+            "James 1:6 - 'But when you ask, you must believe and not doubt, because the one who doubts is like a wave of the sea, blown and tossed by the wind.'",
+
+            "Hebrews 11:1 - 'Now faith is confidence in what we hope for and assurance about what we do not see.'",
+
+        ];
+
+        var randomIndex = Math.floor(Math.random() * messages.length);
+        var randomMessage = messages[randomIndex];
+
+        var popup = document.getElementById('popup');
+        popup.querySelector('p').innerHTML = randomMessage;
+        popup.classList.add('visible');
+    </script>
+</body>
+
+</html>
